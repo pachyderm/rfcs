@@ -1,5 +1,16 @@
 # Pachyderm RFCs
 
+tl;dr
+
+High-level feature ideas can be discussed as issues on this repo; proposals
+should be written up as RFCs following the process below. Keep issues on
+pachyderm/pachyderm for things that are implementation-ready (bugs, changes
+for agreed-upon features)
+
+More detailed problems this process tries to solve are here: https://github.com/pachyderm/rfcs/issues/2
+
+---
+
 Many changes, including bug fixes and documentation improvements can be
 implemented and reviewed via the normal GitHub pull request workflow.
 
