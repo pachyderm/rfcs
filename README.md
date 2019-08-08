@@ -199,5 +199,5 @@ go stale when the branch or fork is deleted)
 
 **Pachyderm's RFC process owes its inspiration to the RFC processes of
 [Rust](https://github.com/rust-lang/rfcs) and
-[Ember.js](https://raw.githubusercontent.com/emberjs/rfcs/)**
+[Ember.js](https://github.com/emberjs/rfcs/)**
 
