@@ -8,7 +8,7 @@ through a bit of a design process and produce a consensus among the Pachyderm
 core developers.
 
 The "RFC" (request for comments) process is intended to provide a
-consistent and controlled path for new features to enter Pachyderm.
+consistent, repeatable path for new features to enter Pachyderm.
 
 [Active RFC List](https://github.com/pachyderm/rfcs/pulls)
 
