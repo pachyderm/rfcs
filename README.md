@@ -2,12 +2,14 @@
 
 tl;dr
 
-High-level feature ideas can be discussed as issues on this repo; proposals
-should be written up as RFCs following the process below. Keep issues on
-pachyderm/pachyderm for things that are implementation-ready (bugs, changes
-for agreed-upon features)
+- High-level feature ideas get discussed as issues on this repo
+- Specific feature proposals get written up as RFCs (see process below)
+- RFCs land before their feature
+- Keep issues on pachyderm/pachyderm for things that are implementation-ready
+ (bugs, changes for agreed-upon features)
 
-More detailed problems this process tries to solve are here: https://github.com/pachyderm/rfcs/issues/2
+More detailed problems this process tries to solve are here:
+https://github.com/pachyderm/rfcs/issues/2
 
 ---
 
