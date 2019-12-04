@@ -13,7 +13,7 @@ so that Pachyderm's data lineage features continue to work. This will require
 us to both make it natural and simple for external pipelines to read their
 input commits, and unnatural and difficult to read from other commits.
 
-In additional, we'll also need a way to trigger external pipelines when new
+In addition, we'll also need a way to trigger external pipelines when new
 input commits arrive, but as detailed below, we don't foresee much complexity
 here.
 
