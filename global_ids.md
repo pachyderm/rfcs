@@ -2,14 +2,14 @@
 
 ## Goal
 
-Simplify the Pachyderm's data model, both from a user and implementation
+Simplify Pachyderm's data model, both from a user and implementation
 perspective by having global identifiers for jobs and commits, rather than
 local identifiers that are linked together.
 
 ## Use Case:
 
-Give users intuitive answers to the question how do I get from X to Y, where
-`X` and `Y` can be commits or jobs at any point in the DAG.
+Give users intuitive answers to the question how do I get from `X` to `Y`,
+     where `X` and `Y` can be commits or jobs at any point in the DAG.
 
 ## Proposal
 
@@ -110,6 +110,12 @@ is a lot simpler, so less to be gained there.
 ## Complications
 While I think this overall simplifies our implementation it does introduce
 a few complications.
+
+### Stat Commits
+Stat commits are a little complicated because they occur in the same repo as
+the commits they're provenant on, which would cause a name collision. I think
+this is fairly easily patch by either namespacing commits by repo and branch,
+or by moving them into a separate repo.
 
 ### Multiple inputs
 Pipelines with multiple inputs have create an interesting complication.
