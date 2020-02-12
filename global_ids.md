@@ -136,6 +136,10 @@ alias for whatever's currently the head commit of master. That's basically how
 it will be implemented.
 
 ### Branch Movements
+
+Note: this section is mostly superseded by the section after it, but is left
+here for posterity.
+
 Moving branches around is the other case where this can start to break down.
 For the most common use case for branch movements, deferred processing, this
 should work fine, because generally the commit you're moving to hasn't been
@@ -167,3 +171,17 @@ This case is the part of this proposal I'm least sure about, so I think we
 should leave this a little open once we actually dive into the code to see what
 makes sense. I think overall though this particular piece isn't that important
 of a use case, so we should be able to find something good enough here.
+
+### Generalized Solution
+
+This supersedes most of what's in the Branch Movements section above, should be
+easier to reason about and apply generally to whatever crazy things people do
+without us having to think about each specific case one by one.
+
+Every Pachyderm operation occurs within a transaction which has an ID
+associated with it. Whenever a transaction runs it moves around the heads of
+branches, and creates downstream jobs which process those heads. For each
+transaction we simply use the transaction ID as the ID for all new commits
+created, the head of all branches are also set to this commit ID, which is then
+aliased to the right commit for the branch if a new one wasn't created, and
+finally create a job for this transaction, also using the ID.
