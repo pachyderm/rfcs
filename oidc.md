@@ -17,8 +17,8 @@ When a user wants to login (i.e. uses `pachctl auth login`), and their account i
     2. Client sends the request to the Authorization Server.
 The user will then go to the URL to the IdP, and enter their login information there.
    
-   3. Authorization Server Authenticates the End-User.
-   4. Authorization Server obtains End-User Consent/Authorization.
+    3. Authorization Server Authenticates the End-User.
+    4. Authorization Server obtains End-User Consent/Authorization.
 The IdP will authenticate the user, and request their consent to use OIDC for Pachyderm.
 
     5. Authorization Server sends the End-User back to the Client with an Authorization Code.
@@ -31,7 +31,7 @@ This is where the URL we required the user to set up comes in: it's what we send
     7. Client receives a response that contains an ID Token and Access Token in the response body.
  The user's Pachyderm then turns around and makes a request to the IdP's token endpoint using this Authorization Code. Assuming the Authorization Code is authenticated, the response will include the Access Token. 
 
-   8. Client validates the ID token and retrieves the End-User's Subject Identifier.
+    8. Client validates the ID token and retrieves the End-User's Subject Identifier.
 
 Pachyderm will then ask the IdP for the username associated with the Access Token, in order to authenticate it. Assuming it is authentic, we will then create a Pachyderm Token, which we will write to the user's config file at `~/.pachyderm/config.json`.
 
