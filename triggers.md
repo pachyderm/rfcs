@@ -43,7 +43,7 @@ implementation will be in pfs.
 Add a trigger field to pfs inputs called "trigger" with the following spec:
 
 ```proto
-message TriggerCond {
+message Trigger {
   string branch = 1;
   // Triggers if the cron spec has been satisfied since the last trigger and
   // there's been a new commit.
@@ -68,7 +68,7 @@ have been 10 megabytes of new data it would look like this.
     "pfs": {
       "glob": "/*",
       "repo": "images",
-      "trigger" {
+      "trigger": {
         "size": "10M"
       }
     }
@@ -82,7 +82,7 @@ have been 10 megabytes of new data it would look like this.
 
 ### PFS
 
-Triggers are a new primitive which we'll add to pfs. Similar to provenance,
+Trigger is a new field we'll add to BranchInfos. Similar to provenance,
 triggers are a feature which is mostly implemented and reflected in the pfs api
 but that users will mostly interact with through the pps api. Triggers link
 branches to other branches, and should be though of as saying that one branch
@@ -91,68 +91,43 @@ conditions are met. We refer to this as the first branch being "triggered by"
 the second branch. The API for this looks like so:
 
 ```proto
-// TriggerCond defines the conditions under which a head is moved, and to which
+// Trigger defines the conditions under which a head is moved, and to which
 // branch it is moved.
-message TriggerCond {
+message Trigger {
+  // Which branch this trigger refers to
   string branch = 1;
+  // All indicates that all conditions must be satisfied before the trigger
+  // happens, otherwise any conditions being satisfied will trigger it.
+  bool all = 2;
   // Triggers if the cron spec has been satisfied since the last trigger and
   // there's been a new commit.
-  string cron_spec = 2;
+  string cron_spec = 3;
   // Triggers if there's been `size` new data added since the last trigger.
-  string size = 3;
+  string size = 4;
   // Triggers if there's been `commits` new commits added since the last trigger.
-  int64 commits = 4;
-}
-
-// TriggerPair is a helper struct for TriggerInfo.
-message TriggerPair {
-  Branch branch = 1;
-  TriggerCond cond = 2;
-}
-
-// TriggerInfo defines a trigger and is the structure stored in etcd to persist
-// it. It may operate on any number of branches by having multiple specs, it
-// cannot have multiple specs for the same branch though. Having multiple specs
-// within the same trigger is different from having those specs spread across
-// multiple triggers because the specs trigger atomically.
-message TriggerInfo {
-    Trigger trigger = 1;
-    repeated TriggerPair spec = 2;
+  int64 commits = 5;
 }
 ```
 
-One thing to notice, a trigger is defined by a `TriggerPair` and it does not
-allow you to have a branch trigger another branch on a different repo. Why we
-need this constraint should be obvious but the fact that it's enforced by the
-type system rather than validation logic is an intentional and good feature.
-
-They also support the standard Create, Inspect, List and Delete methods.
-
-```proto
-message CreateTriggerRequest {
-  repeated TriggerPair spec = 1;
-}
-
-message InspectTriggerRequest {
-  Trigger trigger = 1;
-}
-
-message ListTriggerRequest {
-  Repo repo = 1;
-  Branch branch = 2;
-}
-
-message DeleteTriggerRequest {
-  Trigger trigger = 1;
-}
-```
-
+One thing to notice, a trigger does not allow you to have a branch trigger
+another branch on a different repo. This is because triggering updates one
+branches to point to another branches head, branches can only point to commits
+in the same repo, so both branches must also be in the same repo. It's an
+intentional part of this design that the type system enforces this rather than
+validation logic.
 
 ## Implementation
 
-In order to implement this we'll need to store a link from branches to the
-branches they trigger. I don't see a need to store the reverse link, but we may
-want to just in case that changes. This will mean expanding `BranchInfo` like so:
+As mentioned above, to implement this we'll need to store the triggers for
+a Branch in its BranchInfo (which gets stored in etcd). This means that when
+a Branch is moved we need to scan the other branches in the repo to see if any
+need to be triggered. This should be feasible, but with enough branches this
+starts to get expensive. It's unclear if there's a better architecture though,
+we could store the triggers in the triggering branch (rather than the triggered
+branch) but that could lead to a bloated object in etcd, which has its own
+problems. And most likely all the branches will need to be considered anyways
+since in most cases all of the branches will be triggered by the `master`
+branch anyways.
 
 ```proto
 message BranchInfo {
@@ -161,7 +136,7 @@ message BranchInfo {
   repeated Branch provenance = 3;
   repeated Branch subvenance = 5;
   repeated Branch direct_provenance = 6;
-  repeated TriggerCond triggers = 7;
+  Trigger trigger = 7;
 
   // Deprecated field left for backward compatibility.
   string name = 1;
@@ -203,7 +178,7 @@ a pfs master for new storage stuff, so this will be just a small addition to
 that.
 
 ## Branch Naming
-Astute readers may have noticed that the `TriggerCond` message has a field to
+Astute readers may have noticed that the `Trigger` message has a field to
 specify the name of the branch, but it was left blank in the Edges example.
 This is intended because it doesn't make sense for users to have to come up
 with branch names when there's likely nothing they'll want to do with those
@@ -215,21 +190,15 @@ come up with their own names.
 
 ## Pachctl
 Most of the important changes are in the pipelines spec so those won't require
-pachctl changes, but we will have to add trigger specific commands. The only
-really interesting one is `create trigger` `inspect` `delete` and `list` should
-all be fairly obvious except maybe figuring out which fields to display in
-`list`, but there aren't many fields so the answer is probably just all of
-them. For `create trigger` I'm imagining something like this:
+pachctl changes, but we should add triggers to `create branch` so that users
+can create them manually if they want. I'm thinking the syntax would look like
+this:
 
 ```
-# staging triggers master every 1G of data
-pachctl create trigger repo@staging repo@master --size 1G
-# staging triggers master every day
-pachctl create trigger repo@staging repo@master --cron "@daily"
+# input triggers when master has 1G of new data
+pachctl create branch repo@input --trigger-on master --size 1G
+# input triggers daily (if master has a new commit)
+pachctl create trigger repo@input repo@master --trigger-on master --cron "@daily"
+# input triggers when master has 1G of new data or daily (if there's a new commit)
+pachctl create trigger repo@input repo@master --trigger-on master --size 1G --cron "@daily"
 ```
-
-This doesn't give users a way to create a trigger with multiple conditions,
-I think trying to squeeze that into the cli might be more trouble than it's
-worth. Although if the implementor wishes to try they're welcome to. It should
-be a very rare use case so I think it may make sense to provide a `-f` flag
-where one can specify the trigger as json similar to a pipeline spec.
