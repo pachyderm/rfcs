@@ -51,7 +51,7 @@ Here's an example of what this would look like in practice:
   "spout": {},
   "transform": {
     "cmd": [ "bash" ],
-    "stdin" [
+    "stdin": [
         "# download files to /tmp/files",
         "pachctl put file -r -f /tmp/files",
         "rm -rf /tmp/files"
