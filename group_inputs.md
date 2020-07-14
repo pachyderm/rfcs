@@ -47,7 +47,7 @@ Suppose an input repo in which the file names are timestamps such as
                   "group_on": "$1"
                 }
             }
-        ]
+        ],
         "count": 10,
     }
   }
