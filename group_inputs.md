@@ -1,5 +1,7 @@
 # Group Inputs
 
+Stub code for this proposal can be found here: https://github.com/pachyderm/pachyderm/tree/bucket_inputs
+
 ## Goal
 
 Pachyderm is often used to store timeseries data. One of the most common things
