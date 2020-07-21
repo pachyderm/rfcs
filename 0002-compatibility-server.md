@@ -41,7 +41,7 @@ When we release, we'd push compatibility files to this bucket.
 
 When a user runs `pachctl deploy dash` or `pachctl deploy ide`, we'd find
 the appropriate file in `https://compatibility.pachyderm.com/dash` and
-`https://compatibility.pachyderm.com/dash` respectively, rather than via
+`https://compatibility.pachyderm.com/ide` respectively, rather than via
 `raw.githubusercontent.com` as per usual.
 
 In the future, if our compatibility needs get more complex, we'd have the
