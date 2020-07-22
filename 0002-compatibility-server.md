@@ -28,6 +28,8 @@ versions so that we can eventually remove this directory.
 
 ## Detailed design
 
+### Server
+
 For the foreseeable future:
 
 1) Add a subdomain `compatibility.pachyderm.com` that points to an object
@@ -37,16 +39,26 @@ store bucket.
 3) The bucket contains a separate `ide` directory which contains a similar
 mapping for pachyderm core -> IDE versions.
 
-When we release, we'd push compatibility files to this bucket.
-
 When a user runs `pachctl deploy dash` or `pachctl deploy ide`, we'd find
 the appropriate file in `https://compatibility.pachyderm.com/dash` and
 `https://compatibility.pachyderm.com/ide` respectively, rather than via
 `raw.githubusercontent.com` as per usual.
 
-In the future, if our compatibility needs get more complex, we'd have the
-flexibility of swapping out the static content stored on the object store with
-a custom server.
+This design should be more easily extensible along two fronts:
+
+1) Should our compatibility needs get more complex, we have the flexibility of
+swapping out statically hosted content with a custom server.
+2) As the need for future compatibility matrices must be maintained, we won't
+pollute the core repo with more directories that cannot be moved or changed.
+
+### Releasing
+
+Currently, we determine compatible versions of dash at release time: a script
+is called that stores the result in `etc/compatibility/<pach core version>`.
+That same process would be maintained, but instead of storing it in the
+aforementioned path, all releases subsequent to this RFC's implementation
+would instead upload that same file to the compatibility bucket. Likewise
+with the IDE.
 
 ## How We Teach This
 
